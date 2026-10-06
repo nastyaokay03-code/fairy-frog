@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Лягушка и дверь знаний</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    font-family: 'Georgia', serif;
+    background: radial-gradient(ellipse at top, #2a1a4a 0%, #0f0820 60%, #050210 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  .stars {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+      radial-gradient(1px 1px at 60% 70%, #ffd, transparent),
+      radial-gradient(2px 2px at 80% 20%, #fdf, transparent),
+      radial-gradient(1px 1px at 30% 80%, #fff, transparent),
+      radial-gradient(2px 2px at 50% 50%, #ffd, transparent),
+      radial-gradient(1px 1px at 10% 60%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 40%, #fdf, transparent);
+    background-size: 100% 100%;
+    animation: twinkle 4s infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: .4; } to { opacity: 1; } }
+
+  .scene {
+    position: relative;
+    width: 900px;
+    height: 600px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 40px;
+    padding-bottom: 40px;
+  }
+
+  .ground {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, #1a0f3a, #0a0520);
+    border-top: 2px solid #4a2a8a;
+    box-shadow: 0 -10px 40px rgba(150, 100, 255, 0.2);
+  }
+
+  .door-wrap {
+    position: relative;
+    width: 220px;
+    height: 380px;
+    perspective: 1000px;
+    cursor: pointer;
+  }
+  .door-frame {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #3a2a1a, #1a0f05);
+    border-radius: 110px 110px 6px 6px;
+    box-shadow:
+      inset 0 0 30px rgba(0,0,0,0.8),
+      0 0 40px rgba(200, 150, 255, 0.3);
+  }
+  .door {
+    position: absolute;
+    top: 10px; left: 10px;
+    width: 200px;
+    height: 360px;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.15) 0px,
+        rgba(0,0,0,0.15) 2px,
+        transparent 2px,
+        transparent 40px),
+      linear-gradient(135deg, #6b4423 0%, #4a2e15 50%, #3a220f 100%);
+    border-radius: 100px 100px 4px 4px;
+    transform-origin: left center;
+    transition: transform 2s cubic-bezier(.4,0,.2,1);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    animation: doorPulse 3s ease-in-out infinite;
+  }
+  @keyframes doorPulse {
+    0%, 100% { box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 20px rgba(150,100,255,0.3); }
+    50% { box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 50px rgba(200,150,255,0.6); }
+  }
+  .door.open {
+    transform: rotateY(-95deg);
+    animation: none;
+  }
+  .door.open::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 100px 100px 4px 4px;
+    background: radial-gradient(circle at 30% 50%, #fffbe0 0%, #ffd070 30%, #ff9040 70%, transparent 100%);
+    animation: lightGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes lightGlow {
+    from { opacity: 0.7; } to { opacity: 1; }
+  }
+  .lock {
+    position: absolute;
+    top: 180px; left: 150px;
+    width: 30px; height: 36px;
+    background: linear-gradient(135deg, #d4af37, #8b6914);
+    border-radius: 6px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .lock::before {
+    content: '';
+    position: absolute;
+    top: -14px; left: 5px;
+    width: 20px; height: 20px;
+    border: 5px solid #d4af37;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+  }
+  .lock::after {
+    content: '';
+    position: absolute;
+    top: 12px; left: 11px;
+    width: 8px; height: 10px;
+    background: #2a1a05;
+    border-radius: 2px;
+  }
+  .lock.gone { opacity: 0; transform: translateY(20px) scale(0.5); }
+
+  .door-wrap.shake { animation: shake 0.5s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+
+  .frog-wrap {
+    position: relative;
+    width: 180px;
+    height: 220px;
+    cursor: pointer;
+    transition: transform 0.8s cubic-bezier(.4,0,.2,1);
+    animation: frogFloat 3s ease-in-out infinite;
+  }
+  @keyframes frogFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .frog-wrap.happy {
+    animation: frogHappy 1.5s ease-in-out infinite;
+  }
+  @keyframes frogHappy {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-30px) rotate(3deg); }
+  }
+  .frog-wrap.sad {
+    animation: frogSad 0.6s ease-in-out;
+  }
+  @keyframes frogSad {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(5px) rotate(-5deg); }
+    75% { transform: translateY(5px) rotate(5deg); }
+  }
+
+  .frog-svg { width: 100%; height: 100%; overflow: visible; }
+  .wing {
+    transform-origin: 90px 100px;
+    animation: wingFlap 1.2s ease-in-out infinite;
+  }
+  .wing.right { animation-delay: 0s; transform-origin: 90px 100px; }
+  .wing.left { animation-delay: 0s; }
+  @keyframes wingFlap {
+    0%, 100% { transform: rotate(0deg) scaleX(1); }
+    50% { transform: rotate(-15deg) scaleX(0.85); }
+  }
+  .wing.glow { filter: drop-shadow(0 0 10px #ffddff) drop-shadow(0 0 20px #ff88ff); }
+
+  .scroll {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 420px;
+    background: linear-gradient(135deg, #f4e4bc, #d4b483);
+    border: 3px solid #8b6914;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.7), 0 0 30px rgba(255,200,100,0.4);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(.3,1.5,.5,1), opacity 0.4s;
+    z-index: 10;
+    color: #3a220f;
+    text-align: center;
+  }
+  .scroll.visible {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  .scroll::before, .scroll::after {
+    content: '';
+    position: absolute;
+    left: -10px; right: -10px;
+    height: 20px;
+    background: linear-gradient(90deg, #8b6914, #d4af37, #8b6914);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .scroll::before { top: -10px; }
+  .scroll::after { bottom: -10px; }
+
+  .scroll h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #4a220f;
+    font-style: italic;
+  }
+  .scroll input {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border: 2px solid #8b6914;
+    border-radius: 8px;
+    background: #fff8e0;
+    color: #3a220f;
+    font-family: inherit;
+    margin-bottom: 15px;
+    text-align: center;
+    outline: none;
+  }
+  .scroll input:focus { border-color: #d4af37; box-shadow: 0 0 10px rgba(212,175,55,0.5); }
+  .scroll button {
+    padding: 10px 30px;
+    font-size: 16px;
+    background: linear-gradient(135deg, #8b6914, #d4af37);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+  }
+  .scroll button:hover { transform: translateY(-2px); }
+
+  .hint {
+    position: absolute;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(60, 20, 100, 0.95);
+    border: 2px solid #d4af37;
+    border-radius: 20px;
+    padding: 15px 25px;
+    font-size: 16px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.4s, transform 0.4s;
+    max-width: 600px;
+    text-align: center;
+    z-index: 20;
+    pointer-events: none;
+    box-shadow: 0 0 30px rgba(212,175,55,0.5);
+  }
+  .hint.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .victory {
+    position: absolute;
+    top: 30px; left: 50%;
+    transform: translateX(-50%) scale(0);
+    font-size: 42px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 20px #ff88ff, 0 0 40px #ffd700;
+    transition: transform 0.8s cubic-bezier(.3,1.8,.5,1);
+    z-index: 15;
+    letter-spacing: 2px;
+  }
+  .victory.show { transform: translateX(-50%) scale(1); }
+
+  .intro {
+    position: absolute;
+    top: 20px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: #b8a8d8;
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  .key {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(.3,1.8,.5,1), opacity 0.4s;
+    z-index: 12;
+    animation: keyFloat 2s ease-in-out infinite;
+  }
+  .key.visible {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  @keyframes keyFloat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); }
+    50% { transform: translate(-50%, -55%) scale(1.05) rotate(5deg); }
+  }
+  .key:hover {
+    filter: drop-shadow(0 0 20px #ffd700) drop-shadow(0 0 40px #ffaa00);
+  }
+  .key-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 10px #ffd700);
+  }
+
+  .final-message {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 500px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.95), rgba(255, 180, 50, 0.95));
+    border: 4px solid #ffd700;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.8), 0 0 100px rgba(255, 150, 50, 0.5);
+    opacity: 0;
+    transition: transform 1s cubic-bezier(.3,1.8,.5,1), opacity 0.6s;
+    z-index: 25;
+    text-align: center;
+    color: #3a220f;
+  }
+  .final-message.visible {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  .final-message h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #4a220f;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+  }
+  .final-message p {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #2a1a05;
+  }
+  .final-message .emoji {
+    font-size: 48px;
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <div class="intro">✨ Нажми на лягушку или на дверь, чтобы начать ✨</div>
+
+  <div class="scene">
+    <div class="door-wrap" id="door">
+      <div class="door-frame"></div>
+      <div class="door" id="doorInner">
+        <div class="lock" id="lock"></div>
+      </div>
+    </div>
+
+    <div class="frog-wrap" id="frog">
+      <svg class="frog-svg" viewBox="0 0 180 220">
+        <g class="wing left" id="wingLeft">
+          <path d="M 90 100 Q 30 60 20 100 Q 25 130 90 115 Z"
+                fill="rgba(255, 200, 255, 0.6)"
+                stroke="#ff88ff" stroke-width="1.5"/>
+          <path d="M 90 100 Q 50 75 40 100" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        </g>
+        <g class="wing right" id="wingRight">
+          <path d="M 90 100 Q 150 60 160 100 Q 155 130 90 115 Z"
+                fill="rgba(255, 200, 255, 0.6)"
+                stroke="#ff88ff" stroke-width="1.5"/>
+          <path d="M 90 100 Q 130 75 140 100" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        </g>
+
+        <ellipse cx="90" cy="140" rx="55" ry="50" fill="#4caf50"/>
+        <ellipse cx="90" cy="155" rx="40" ry="30" fill="#81c784"/>
+
+        <ellipse cx="55" cy="185" rx="18" ry="8" fill="#388e3c"/>
+        <ellipse cx="125" cy="185" rx="18" ry="8" fill="#388e3c"/>
+
+        <ellipse cx="90" cy="95" rx="50" ry="40" fill="#4caf50"/>
+
+        <circle cx="65" cy="65" r="18" fill="#4caf50"/>
+        <circle cx="115" cy="65" r="18" fill="#4caf50"/>
+        <circle cx="65" cy="65" r="14" fill="#fff"/>
+        <circle cx="115" cy="65" r="14" fill="#fff"/>
+        <circle id="pupilL" cx="65" cy="68" r="7" fill="#1a1a1a"/>
+        <circle id="pupilR" cx="115" cy="68" r="7" fill="#1a1a1a"/>
+        <circle cx="67" cy="65" r="2" fill="#fff"/>
+        <circle cx="117" cy="65" r="2" fill="#fff"/>
+
+        <circle cx="55" cy="105" r="6" fill="#ff88aa" opacity="0.6"/>
+        <circle cx="125" cy="105" r="6" fill="#ff88aa" opacity="0.6"/>
+
+        <path id="mouth" d="M 70 110 Q 90 120 110 110" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+        <path d="M 70 50 L 75 35 L 82 45 L 90 30 L 98 45 L 105 35 L 110 50 Z"
+              fill="#ffd700" stroke="#d4af37" stroke-width="1"/>
+        <circle cx="90" cy="38" r="3" fill="#ff4488"/>
+      </svg>
+    </div>
+
+    <div class="scroll" id="scroll">
+      <h2 id="questionText">Какая была тема урока?</h2>
+      <input type="text" id="answerInput" placeholder="Напиши ответ..." autocomplete="off">
+      <br>
+      <button id="submitBtn">Ответить</button>
+    </div>
+
+    <div class="key" id="key">
+      <svg class="key-svg" viewBox="0 0 80 80">
+        <circle cx="25" cy="25" r="15" fill="none" stroke="#ffd700" stroke-width="4"/>
+        <circle cx="25" cy="25" r="8" fill="#ffd700"/>
+        <rect x="25" y="35" width="6" height="35" fill="#ffd700"/>
+        <rect x="31" y="50" width="12" height="5" fill="#ffd700"/>
+        <rect x="31" y="60" width="12" height="5" fill="#ffd700"/>
+      </svg>
+    </div>
+
+    <div class="hint" id="hint">Ква-ква! Дверь не откроется, пока ты не вспомнишь тему урока и имя педагога. Попробуй ещё раз!</div>
+
+    <div class="victory" id="victory">✨ Урок окончен! ✨</div>
+
+    <div class="final-message" id="finalMessage">
+      <h2>🎉 Горжусь вами! 🎉</h2>
+      <div class="emoji">🐸✨</div>
+      <p>Волшебная лягушка дарит вам<br><strong>+1 минуту к перерыву</strong><br>во время следующего занятия!</p>
+    </div>
+  </div>
+
+<script>
+  const state = { step: 'idle' };
+
+  const frog = document.getElementById('frog');
+  const door = document.getElementById('door');
+  const doorInner = document.getElementById('doorInner');
+  const lock = document.getElementById('lock');
+  const scroll = document.getElementById('scroll');
+  const questionText = document.getElementById('questionText');
+  const answerInput = document.getElementById('answerInput');
+  const submitBtn = document.getElementById('submitBtn');
+  const hint = document.getElementById('hint');
+  const victory = document.getElementById('victory');
+  const wingL = document.getElementById('wingLeft');
+  const wingR = document.getElementById('wingRight');
+  const mouth = document.getElementById('mouth');
+  const key = document.getElementById('key');
+  const finalMessage = document.getElementById('finalMessage');
+
+  let audioCtx = null;
+  function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+  function playQuack() {
+    const ctx = getAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(220, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.15);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.2);
+  }
+  function playMagic() {
+    const ctx = getAudio();
+    const notes = [523, 659, 784, 1047, 1319];
+    notes.forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      const t0 = ctx.currentTime + i * 0.12;
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(0.15, t0 + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.6);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0 + 0.6);
+    });
+  }
+  function playKeySound() {
+    const ctx = getAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(800, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+    g.gain.setValueAtTime(0.2, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.3);
+  }
+  function playError() {
+    const ctx = getAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(180, ctx.currentTime);
+    o.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.3);
+  }
+
+  function openScroll() {
+    if (state.step !== 'idle') return;
+    state.step = 'q1';
+    questionText.textContent = 'Какая была тема урока?';
+    answerInput.value = '';
+    scroll.classList.add('visible');
+    setTimeout(() => answerInput.focus(), 500);
+    playQuack();
+  }
+
+  frog.addEventListener('click', openScroll);
+  door.addEventListener('click', () => {
+    if (state.step === 'idle') {
+      openScroll();
+    } else if (state.step === 'q1' || state.step === 'q2') {
+      wrongAnswer();
+    } else if (state.step === 'keyFound') {
+      showHint('Ква! Ты забыл волшебный ключ! Нажми на него, чтобы открыть дверь!');
+      door.classList.add('shake');
+      setTimeout(() => door.classList.remove('shake'), 500);
+    }
+  });
+
+  function checkAnswer() {
+    const val = answerInput.value.trim();
+    if (!val) {
+      showHint('Ква! Сначала напиши ответ в свиток!');
+      return;
+    }
+
+    if (state.step === 'q1') {
+      playQuack();
+      frog.classList.add('happy');
+      wingL.classList.add('glow');
+      wingR.classList.add('glow');
+      setTimeout(() => {
+        frog.classList.remove('happy');
+        wingL.classList.remove('glow');
+        wingR.classList.remove('glow');
+      }, 1200);
+      state.step = 'q2';
+      questionText.textContent = 'Как зовут педагога?';
+      answerInput.value = '';
+      answerInput.focus();
+    } else if (state.step === 'q2') {
+      // Любой непустой ответ принимается
+      playQuack();
+      frog.classList.add('happy');
+      wingL.classList.add('glow');
+      wingR.classList.add('glow');
+      setTimeout(() => {
+        frog.classList.remove('happy');
+        wingL.classList.remove('glow');
+        wingR.classList.remove('glow');
+      }, 1200);
+      showKey();
+    }
+  }
+
+  submitBtn.addEventListener('click', checkAnswer);
+  answerInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkAnswer();
+  });
+
+  function showKey() {
+    state.step = 'keyFound';
+    scroll.classList.remove('visible');
+    playMagic();
+
+    setTimeout(() => {
+      key.classList.add('visible');
+      playKeySound();
+      showHint('Ква! Нашёл волшебный ключ! Нажми на него, чтобы открыть дверь!');
+    }, 600);
+  }
+
+  key.addEventListener('click', () => {
+    if (state.step === 'keyFound') {
+      victorySequence();
+    }
+  });
+
+  function wrongAnswer() {
+    playError();
+    frog.classList.add('sad');
+    mouth.setAttribute('d', 'M 70 115 Q 90 105 110 115');
+    door.classList.add('shake');
+    showHint('Ква-ква! Дверь не откроется, пока ты не вспомнишь тему урока и имя педагога. Попробуй ещё раз!');
+    setTimeout(() => {
+      frog.classList.remove('sad');
+      door.classList.remove('shake');
+      mouth.setAttribute('d', 'M 70 110 Q 90 120 110 110');
+    }, 1500);
+  }
+
+  let hintTimer = null;
+  function showHint(text) {
+    hint.textContent = text;
+    hint.classList.add('show');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hint.classList.remove('show'), 3500);
+  }
+
+  function victorySequence() {
+    state.step = 'done';
+    playMagic();
+    key.classList.remove('visible');
+    frog.classList.add('happy');
+    wingL.classList.add('glow');
+    wingR.classList.add('glow');
+
+    setTimeout(() => {
+      lock.classList.add('gone');
+      playMagic();
+    }, 600);
+
+    setTimeout(() => {
+      doorInner.classList.add('open');
+      victory.classList.add('show');
+      playMagic();
+    }, 1400);
+
+    setTimeout(() => {
+      finalMessage.classList.add('visible');
+      playMagic();
+    }, 2500);
+  }
+</script>
+</body>
+</html>
